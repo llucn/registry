@@ -63,12 +63,13 @@ if [ ! -f "$CODE_SERVER" ] || [ "${USE_CACHED}" != true ]; then
   ARGS=(
     "--method=standalone"
     "--prefix=${INSTALL_PREFIX}"
+    "--download_base_link=${DOWNLOAD_BASE_LINK}"
   )
   if [ -n "${VERSION}" ]; then
     ARGS+=("--version=${VERSION}")
   fi
 
-  output=$(curl -fsSL https://code-server.dev/install.sh | sh -s -- "$${ARGS[@]}")
+  output=$(echo -n "${INSTALL_SHELL_BASE64}" | base64 -d | sh -s -- "$${ARGS[@]}")
   if [ $? -ne 0 ]; then
     echo "Failed to install code-server: $output"
     exit 1
