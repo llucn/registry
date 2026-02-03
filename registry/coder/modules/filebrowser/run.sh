@@ -8,7 +8,7 @@ printf "$${BOLD}Installing filebrowser \n\n"
 
 # Check if filebrowser is installed
 if ! command -v filebrowser &> /dev/null; then
-  curl -fsSL https://raw.githubusercontent.com/filebrowser/get/master/get.sh | bash
+  echo -n "${GET_SHELL_BASE64}" | base64 -d | bash -s -- --version=${VERSION} --download_base_link=${DOWNLOAD_BASE_LINK}
 fi
 
 printf "🥳 Installation complete! \n\n"
