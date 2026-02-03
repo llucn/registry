@@ -89,6 +89,17 @@ variable "subdomain" {
   default     = true
 }
 
+variable "install_version" {
+  type        = string
+  description = "The version of filebrowser to install."
+}
+
+variable "download_base_link" {
+  type        = string
+  description = "URL of the download base link."
+  default     = "https://github.com/filebrowser/filebrowser/releases/download"
+}
+
 resource "coder_script" "filebrowser" {
   agent_id     = var.agent_id
   display_name = "File Browser"
@@ -99,7 +110,10 @@ resource "coder_script" "filebrowser" {
     FOLDER : var.folder,
     DB_PATH : var.database_path,
     SUBDOMAIN : var.subdomain,
-    SERVER_BASE_PATH : local.server_base_path
+    SERVER_BASE_PATH : local.server_base_path,
+    VERSION : var.install_version,
+    DOWNLOAD_BASE_LINK : var.download_base_link,
+    GET_SHELL_BASE64 : local.get_shell_base64,
   })
   run_on_start = true
 }
@@ -126,5 +140,6 @@ locals {
   server_base_path = var.subdomain ? "" : format("/@%s/%s%s/apps/%s", data.coder_workspace_owner.me.name, data.coder_workspace.me.name, var.agent_name != null ? ".${var.agent_name}" : "", var.slug)
   url              = "http://localhost:${var.port}${local.server_base_path}"
   healthcheck_url  = "http://localhost:${var.port}${local.server_base_path}/health"
+  get_shell_base64 = base64encode(file("${path.module}/get.sh"))
 }
 
