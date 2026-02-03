@@ -68,14 +68,6 @@ resource "coder_agent" "main" {
   }
 
   metadata {
-    display_name = "RAM Usage"
-    key          = "1_ram_usage"
-    script       = "coder stat mem"
-    interval     = 10
-    timeout      = 1
-  }
-
-  metadata {
     display_name = "Home Disk"
     key          = "3_home_disk"
     script       = "coder stat disk --path $${HOME}"
@@ -124,24 +116,23 @@ resource "coder_agent" "main" {
 # See https://registry.coder.com/modules/coder/code-server
 module "code-server" {
   count  = data.coder_workspace.me.start_count
-  source = "registry.coder.com/coder/code-server/coder"
-
-  # This ensures that the latest non-breaking version of the module gets downloaded, you can also pin the module version to prevent breaking changes in production.
-  version = "~> 1.0"
-
+  source = "http://host.docker.internal:3000/modules/coder/code-server/coder/latest-code-server.tar.gz"
+  install_version = "4.104.3"
+  download_base_link = "http://host.docker.internal:3000/releases/code-server"
   agent_id   = coder_agent.main.id
-  agent_name = "main"
   order      = 1
 }
 
-# See https://registry.coder.com/modules/coder/jetbrains
-module "jetbrains" {
-  count      = data.coder_workspace.me.start_count
-  source     = "registry.coder.com/modules/coder/jetbrains/coder"
-  version    = "~> 1.0"
-  agent_id   = coder_agent.main.id
-  agent_name = "main"
-  folder     = "/home/coder"
+module "filebrowser" {
+  count         = data.coder_workspace.me.start_count
+  source        = "http://host.docker.internal:3000/modules/coder/filebrowser/coder/latest-filebrowser.tar.gz"
+  install_version = "2.53.1"
+  download_base_link = "http://host.docker.internal:3000/releases/filebrowser"
+  agent_id      = coder_agent.main.id
+  agent_name    = "main"
+  folder        = "/home/coder"
+  database_path = ".config/filebrowser.db"
+  subdomain     = false
 }
 
 resource "docker_volume" "home_volume" {

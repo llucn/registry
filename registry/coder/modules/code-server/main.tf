@@ -71,7 +71,12 @@ variable "log_path" {
 variable "install_version" {
   type        = string
   description = "The version of code-server to install."
-  default     = ""
+}
+
+variable "download_base_link" {
+  type        = string
+  description = "URL of the download base link."
+  default     = "https://github.com/coder/code-server/releases/download"
 }
 
 variable "share" {
@@ -154,6 +159,10 @@ variable "additional_args" {
   default     = ""
 }
 
+locals {
+  install_shell_base64 = base64encode(file("${path.module}/install.sh"))
+}
+
 resource "coder_script" "code-server" {
   agent_id     = var.agent_id
   display_name = "code-server"
@@ -175,6 +184,8 @@ resource "coder_script" "code-server" {
     FOLDER : var.folder,
     AUTO_INSTALL_EXTENSIONS : var.auto_install_extensions,
     ADDITIONAL_ARGS : var.additional_args,
+    DOWNLOAD_BASE_LINK : var.download_base_link,
+    INSTALL_SHELL_BASE64 : local.install_shell_base64,
   })
   run_on_start = true
 
